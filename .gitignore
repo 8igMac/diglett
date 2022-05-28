@@ -1,2 +1,3 @@
 venv/
 model/
+pretrained_model_checkpoints/
