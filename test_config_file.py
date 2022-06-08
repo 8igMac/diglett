@@ -36,6 +36,8 @@ async def receive(websocket):
             print(message["speaker_name"])
         if "speaker_embedding" in message:
             print(message["speaker_embedding"])
+        if "avg_db" in message:
+            print(message["avg_db"])
 
 async def main():
     raw_audio = audio.read_wav_file("gg.wav")

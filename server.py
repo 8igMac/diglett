@@ -37,6 +37,7 @@ async def config(websocket: WebSocket):
             message = {
                 "speaker_name": "小芬姊",
                 "speaker_embedding": [0.5, 0.1],
+                "avg_db": 100,
             }
 
             # Send audio label.
@@ -55,11 +56,12 @@ async def websocket_endpoint(websocket: WebSocket):
     Input: Continuous audio stream.
         {
             "audio_data": [base64 encoded bytes],
+            "speaker_embedding": [speaker emb1, speaker emb2]
             "terminate_session": bool,
         }
     Output: Continuous label stream.
         {
-            "speaker": str,
+            "speaker": speaker_emb,
             "db": float,
         }
     """
@@ -85,7 +87,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # TODO: VAD
             # TODO: Speaker verification.
             message = {
-                "speaker": "alice",
+                "speaker": [0.5, 0.1],
                 "db": 56,
             }
 
