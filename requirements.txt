@@ -5,3 +5,4 @@ speechbrain==0.5.11
 websockets==10.3
 torch==1.11.0
 torchaudio==0.11.0
+python-dotenv==0.20.0

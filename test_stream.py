@@ -4,8 +4,15 @@ import asyncio
 import json
 import wave
 import base64
+import os
+from dotenv import load_dotenv
 
 import config
+
+# Load sensitive data from .env
+load_dotenv()
+SERVER_IP = os.getenv("SERVER_IP")
+PORT = os.getenv("PORT")
 
 async def send(websocket, stream):
     for i in range(int(config.fs / config.chunk * config.seconds)):
@@ -55,7 +62,7 @@ async def main():
         input=True,
     )
 
-    async with websockets.connect("ws://127.0.0.1:8000/ws/stream") as websocket:
+    async with websockets.connect(f"ws://{SERVER_IP}:{PORT}/ws/stream") as websocket:
         send_result, receive_result = await asyncio.gather(
             receive(websocket),
             send(websocket, stream), 
