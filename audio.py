@@ -1,5 +1,6 @@
 import wave
 import pyaudio
+import config
 
 def read_wav_file(filename:str):
     """
