@@ -4,3 +4,4 @@ pretrained_model_checkpoints/
 data/
 .env
 __pycache__/
+*.wav
