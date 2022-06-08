@@ -5,7 +5,7 @@ import base64
 import os
 from dotenv import load_dotenv
 
-import utils
+import audio
 import config
 
 # Load sensitive data from .env
@@ -38,12 +38,12 @@ async def receive(websocket):
             print(message["speaker_embedding"])
 
 async def main():
-    raw_audio = utils.read_wav_file("gg.wav")
+    raw_audio = audio.read_wav_file("gg.wav")
     async with websockets.connect(f"ws://{SERVER_IP}:{PORT}/ws/config") as websocket:
         await send(websocket, raw_audio)
         await receive(websocket)
     # # Write audio for debugging.
-    # utils.write_wav_file("hh.wav", raw_audio)
+    # audio.write_wav_file("hh.wav", raw_audio)
 
 if __name__ == "__main__":
     asyncio.run(main())
