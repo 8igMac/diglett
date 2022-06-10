@@ -2,16 +2,21 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import asyncio
 import json
 import base64
-from speechbrain.pretrained import VAD
+from speechbrain.pretrained import VAD, EncoderClassifier
 
 from utils import bytes_preproc
 from audio import get_mean_energy
 
 app = FastAPI()
-tmpdir = './model/vad'
+vad_dir = './model/vad'
+classifier_dir = './model/classifier'
 vad = VAD.from_hparams(
     source="speechbrain/vad-crdnn-libriparty",
-    savedir=tmpdir,
+    savedir=vad_dir,
+)
+classifier = EncoderClassifier.from_hparams(
+    source="speechbrain/spkrec-ecapa-voxceleb",
+    savedir=classifier_dir,
 )
 
 @app.websocket("/ws/config")
@@ -38,10 +43,16 @@ async def config(websocket: WebSocket):
             mean = get_mean_energy(audio_data)
             print(f"mean: {mean}")
 
+            # Get speaker embedding.
+            processed_audio = bytes_preproc(audio_data)
+            emb = classifier.encode_batch(processed_audio)
+            # (batch, channel, time) -> (time)
+            emb = emb.reshape(-1).numpy().tolist()
+
             # Send message.
             message = {
                 "speaker_name": "小芬姊",
-                "speaker_embedding": [0.5, 0.1],
+                "speaker_embedding": emb,
                 "avg_db": mean,
             }
 
