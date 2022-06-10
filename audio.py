@@ -40,6 +40,12 @@ def read_wav_file(filename:str):
     return b"".join(frames)
 
 def write_wav_file(filename: str, raw_audio: bytes):
+    """ Write audio bytes into wave file.
+
+    Args:
+        filename: Filename of output wave.
+        raw_audio: Raw audio in bytes.
+    """
     with wave.open(filename, "wb") as wf:
         wf.setnchannels(config.channels)
         wf.setsampwidth(pyaudio.get_sample_size(config.sample_format))
