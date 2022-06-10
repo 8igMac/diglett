@@ -5,6 +5,7 @@ import base64
 from speechbrain.pretrained import VAD
 
 from utils import bytes_preproc
+from audio import get_mean_energy
 
 app = FastAPI()
 tmpdir = './model/vad'
@@ -33,11 +34,15 @@ async def config(websocket: WebSocket):
             encoded = message["audio_data"]
             audio_data = base64.b64decode(encoded)
 
+            # Get mean energy.
+            mean = get_mean_energy(audio_data)
+            print(f"mean: {mean}")
+
             # Send message.
             message = {
                 "speaker_name": "小芬姊",
                 "speaker_embedding": [0.5, 0.1],
-                "avg_db": 100,
+                "avg_db": mean,
             }
 
             # Send audio label.
