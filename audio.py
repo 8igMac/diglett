@@ -48,7 +48,7 @@ def record(seconds: int):
         frames_per_buffer=config.chunk,
         input=True,
     )
-    total_chuncks = int(config.fs / config.chunk * config.seconds)
+    total_chuncks = int(config.fs / config.chunk * seconds)
     frames = list()
     for i in range(total_chuncks):
         data = stream.read(config.chunk)
