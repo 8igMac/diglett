@@ -3,21 +3,37 @@ import websockets
 import asyncio
 import json
 import wave
+import os
+import base64
+from dotenv import load_dotenv
 
-chunk = 1024  # Record in chunks of 1024 samples
-sample_format = pyaudio.paInt16  # 16 bits per sample
-channels = 2
-fs = 44100  # Record at 44100 samples per second
-seconds = 3
-filename = "gg.wav"
+import audio
+import config
 
-frames = []
+# Load sensitive data from .env
+load_dotenv()
+SERVER_IP = os.getenv("SERVER_IP")
+PORT = os.getenv("PORT")
 
-async def send(websocket, stream):
-    for i in range(int(fs / chunk * seconds)):
+async def send(websocket, stream, spkemb1, spkemb2):
+    # for i in range(int(config.fs / config.chunk * config.seconds)):
+    while True:
         try:
-            data = stream.read(chunk)
-            await websocket.send(data)
+            data = stream.read(config.chunk)
+            """
+            Sending JSON:
+            {
+                "audio_data": {base64 encoded audio chunck}
+            }
+            """
+            data = base64.b64encode(data).decode("utf-8")
+            message = {
+                "speaker_embedding": [spkemb1, spkemb2],
+                "audio_data": str(data),
+            }
+            json_data = json.dumps(message)
+
+            await websocket.send(json_data)
         except websockets.exceptions.ConnectionClosedError as e:
             print(e)
             break
@@ -26,40 +42,110 @@ async def send(websocket, stream):
         # Giveup the execution right.
         await asyncio.sleep(0.01)  
     # print("Finished recording sending EOS")
-    await websocket.send(bytes("EOS", "utf-8"))
+    message = {
+        "terminate_session": True,
+    }
+    json_data = json.dumps(message)
+    await websocket.send(json_data)
 
-async def receive(websocket):
+async def receive(websocket, spkemb1, spkemb2):
     async for data in websocket:
-        frames.append(data)
+        message = json.loads(data)
+        if "speaker" in message:
+            emb = message["speaker"]
+        else:
+            print("error: no speaker emb returned")
+
+        if "db" in message:
+            db = message["db"]
+        else:
+            print("error: no db returned")
+
+        if emb == spkemb1:
+            speaker = "speaker  1"
+        elif emb == spkemb2:
+            speaker = "speaker  2"
+        else:
+            speaker = "sil       "
+
+        print(f"speaker: {speaker}, db: {db}")
+
+async def send_config(websocket, raw_audio: bytes):
+    """
+    Sending JSON:
+    {
+        "audio_data": {base64 encoded audio chunck}
+    }
+    """
+    try: 
+        encoded = base64.b64encode(raw_audio).decode("utf-8")
+        json_data = json.dumps({"audio_data": str(encoded)})
+        await websocket.send(json_data)
+    except websockets.exceptions.ConnectionClosedError as e:
+        print(e)
+    except Exception as e:
+        assert False, "Not a websocket 4008 error."
+
+async def receive_config(websocket):
+    async for data in websocket:
+        message = json.loads(data)
+    return message
+
+async def get_speaker_info(filename: str):
+    """Get speaker embedding and db from config API.
+
+    Args:
+        filename: Audio file.
+    Return 
+        (embedding, db)
+    """
+
+    raw_audio = audio.read_wav_file(filename)
+
+    async with websockets.connect(f"ws://{SERVER_IP}:{PORT}/ws/config") as websocket:
+        await send_config(websocket, raw_audio)
+        message = await receive_config(websocket)
+
+    if "speaker_embedding" in message:
+        emb = message["speaker_embedding"]
+    else:
+        print("Error: no message['speaker_embedding']")
+
+    if "avg_db" in message:
+        db = message["avg_db"]
+    else:
+        print("Error: no message['avg_db']")
+
+    return emb, db
 
 async def main():
-    p = pyaudio.PyAudio() # Create an interface to PyAudio.
-
+    # Get speaker embedding and db.
+    spkemb1, db1 = await get_speaker_info("spk1.wav")
+    spkemb2, db2 = await get_speaker_info("spk2.wav")
+    print(len(spkemb1), db1)
+    print(len(spkemb2), db2)
+    
+    # Init stream.
+    p = pyaudio.PyAudio()
     stream = p.open(
-        format=sample_format,
-        channels=channels,
-        rate=fs,
-        frames_per_buffer=chunk,
+        format=config.sample_format,
+        channels=config.channels,
+        rate=config.fs,
+        frames_per_buffer=config.chunk,
         input=True,
     )
 
-    async with websockets.connect("ws://127.0.0.1:8000/ws") as websocket:
+    # Listening
+    async with websockets.connect(f"ws://{SERVER_IP}:{PORT}/ws/stream") as websocket:
         send_result, receive_result = await asyncio.gather(
-            receive(websocket),
-            send(websocket, stream), 
+            receive(websocket, spkemb1, spkemb2),
+            send(websocket, stream, spkemb1, spkemb2), 
         )
 
+    # Close stream.
     stream.stop_stream()
     stream.close()
     p.terminate()
-
-    print("Start writing file.")
-    with wave.open(filename, "wb") as wf:
-        wf.setnchannels(channels)
-        wf.setsampwidth(pyaudio.get_sample_size(sample_format))
-        wf.setframerate(fs)
-        wf.writeframes(b''.join(frames))
-    print("Finished writing file")
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -8,3 +8,7 @@ seconds = 3
 # VAD model preferes:
 channels = 1
 fs = 16000  # Record at 44100 samples per second
+
+# Speaker verification threshold.
+# threshold = 0.25 
+threshold = 0.1

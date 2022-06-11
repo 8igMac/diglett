@@ -2,8 +2,10 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import asyncio
 import json
 import base64
+import torch
 from speechbrain.pretrained import VAD, EncoderClassifier
 
+import config as cfg
 from utils import bytes_preproc
 from audio import get_mean_energy
 
@@ -18,6 +20,7 @@ classifier = EncoderClassifier.from_hparams(
     source="speechbrain/spkrec-ecapa-voxceleb",
     savedir=classifier_dir,
 )
+similarity = torch.nn.CosineSimilarity(dim=-1, eps=1e-6)
 
 @app.websocket("/ws/config")
 async def config(websocket: WebSocket):
@@ -93,18 +96,40 @@ async def websocket_endpoint(websocket: WebSocket):
             encoded = message["audio_data"]
             audio_data = base64.b64decode(encoded)
 
+            # Get mean energy.
+            mean = get_mean_energy(audio_data)
+
             # Decode speaker embedding.
             spks = message["speaker_embedding"]
             assert len(spks) == 2
             spk1, spk2 = spks
-            print(f"Speaker1: {spk1}")
-            print(f"Speaker2: {spk2}")
 
             # TODO: VAD
-            # TODO: Speaker verification.
+
+            # Speaker verification.
+            processed_audio = bytes_preproc(audio_data)
+            emb = classifier.encode_batch(processed_audio)
+
+            spk1_tensor = torch.tensor(spk1).reshape(1, 1, -1)
+            score1 = similarity(emb, spk1_tensor)
+
+            spk2_tensor = torch.tensor(spk2).reshape(1, 1, -1)
+            score2 = similarity(emb, spk2_tensor)
+
+            if score1 > cfg.threshold:
+                spk = spk1
+                print(f"1, score: {score1}, db: {mean:.0f}")
+            elif score2 > cfg.threshold:
+                spk = spk2
+                print(f"2, score: {score2}, db: {mean:.0f}")
+            else:
+                spk = [0]
+                print(f"sil, db: {mean:.0f}")
+
+            # Create message.
             message = {
-                "speaker": [0.5, 0.1],
-                "db": 56,
+                "speaker": spk,
+                "db": mean,
             }
 
             # Send audio label.
