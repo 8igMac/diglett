@@ -19,7 +19,8 @@ async def send(websocket, stream, spkemb1, spkemb2):
     # for i in range(int(config.fs / config.chunk * config.seconds)):
     while True:
         try:
-            data = stream.read(config.chunk)
+            # data = stream.read(config.chunk)
+            data = stream.read(int(config.fs / 3))
             """
             Sending JSON:
             {
@@ -68,7 +69,7 @@ async def receive(websocket, spkemb1, spkemb2):
         else:
             speaker = "sil       "
 
-        print(f"speaker: {speaker}, db: {db}")
+        print(f"speaker: {speaker}, db: {db:5.0f}")
 
 async def send_config(websocket, raw_audio: bytes):
     """
@@ -119,9 +120,22 @@ async def get_speaker_info(filename: str):
     return emb, db
 
 async def main():
+    f1 = "1.wav"
+    f2 = "2.wav"
+
+    # Speaker1 config.
+    print("speaker 1")
+    audio_data = audio.record(5)
+    audio.write_wav_file(f1, audio_data)
+
+    # Speaker2 config.
+    print("speaker 2")
+    audio_data = audio.record(5)
+    audio.write_wav_file(f2, audio_data)
+    
     # Get speaker embedding and db.
-    spkemb1, db1 = await get_speaker_info("spk1.wav")
-    spkemb2, db2 = await get_speaker_info("spk2.wav")
+    spkemb1, db1 = await get_speaker_info(f1)
+    spkemb2, db2 = await get_speaker_info(f2)
     print(len(spkemb1), db1)
     print(len(spkemb2), db2)
     
