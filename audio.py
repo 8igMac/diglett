@@ -2,19 +2,19 @@ import wave
 import pyaudio
 import config
 import numpy as np
-import matplotlib.pyplot as plt
-
-def plot_energy(filename: str, audio_arr: np.ndarray):
-    """ Plot the energy.
-    
-    Args:
-        filename: Output plot file name.
-        audio_arr: numpy array of audio energy.
-    """
-    plt.figure(1)
-    plt.title("Signal Wave...")
-    plt.plot(audio_arr)
-    plt.savefig(filename)
+# import matplotlib.pyplot as plt
+#
+# def plot_energy(filename: str, audio_arr: np.ndarray):
+#     """ Plot the energy.
+#     
+#     Args:
+#         filename: Output plot file name.
+#         audio_arr: numpy array of audio energy.
+#     """
+#     plt.figure(1)
+#     plt.title("Signal Wave...")
+#     plt.plot(audio_arr)
+#     plt.savefig(filename)
 
 def get_mean_energy(raw_audio: bytes):
     """Calculate mean energy level of input audio.
