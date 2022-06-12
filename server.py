@@ -112,19 +112,21 @@ async def websocket_endpoint(websocket: WebSocket):
 
             spk1_tensor = torch.tensor(spk1).reshape(1, 1, -1)
             score1 = similarity(emb, spk1_tensor)
+            score1 = score1.reshape(-1).numpy().tolist()[0]
 
             spk2_tensor = torch.tensor(spk2).reshape(1, 1, -1)
             score2 = similarity(emb, spk2_tensor)
+            score2 = score2.reshape(-1).numpy().tolist()[0]
 
             if score1 > cfg.threshold:
                 spk = spk1
-                print(f"1, score: {score1}, db: {mean:.0f}")
+                print(f"1, score: {score1:.3f}, db: {mean:.0f}")
             elif score2 > cfg.threshold:
                 spk = spk2
-                print(f"2, score: {score2}, db: {mean:.0f}")
+                print(f"2, score: {score2:.3f}, db: {mean:.0f}")
             else:
                 spk = [0]
-                print(f"sil, db: {mean:.0f}")
+                print(f"sil, score1: {score1:.3f}, score2: {score2:.3f}, db: {mean:.0f}")
 
             # Create message.
             message = {

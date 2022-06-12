@@ -5,6 +5,7 @@ import json
 import wave
 import os
 import base64
+import time
 from dotenv import load_dotenv
 
 import audio
@@ -21,6 +22,7 @@ async def send(websocket, stream, spkemb1, spkemb2):
         try:
             # data = stream.read(config.chunk)
             data = stream.read(int(config.fs / 3))
+            print("send data")  # debug
             """
             Sending JSON:
             {
@@ -42,6 +44,7 @@ async def send(websocket, stream, spkemb1, spkemb2):
             assert False, "Not a websocket 4008 error."
         # Giveup the execution right.
         await asyncio.sleep(0.01)  
+        print("sleep done")
     # print("Finished recording sending EOS")
     message = {
         "terminate_session": True,
@@ -49,8 +52,16 @@ async def send(websocket, stream, spkemb1, spkemb2):
     json_data = json.dumps(message)
     await websocket.send(json_data)
 
+def mortor_sim(seconds: int):
+    print("Motor turn.")
+    time.sleep(seconds)
+    print("Motor turn done.")
+
 async def receive(websocket, spkemb1, spkemb2):
+    ignore = 40
     async for data in websocket:
+        ignore -= 1
+
         message = json.loads(data)
         if "speaker" in message:
             emb = message["speaker"]
@@ -69,7 +80,13 @@ async def receive(websocket, spkemb1, spkemb2):
         else:
             speaker = "sil       "
 
-        print(f"speaker: {speaker}, db: {db:5.0f}")
+        print(f"speaker: {speaker}, db: {db:5.0f}, ignore: {ignore}")
+
+        # debug
+        if ignore == 0:
+            if emb == spkemb1 and db > 700:
+                mortor_sim(6)
+                ignore = 50
 
 async def send_config(websocket, raw_audio: bytes):
     """
