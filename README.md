@@ -25,6 +25,10 @@ $ cp example.env .env
 ```sh
 $ uvicorn server:app --reload
 ```
+3. Run the test.
+```sh
+$ python -m pytest
+```
 
 ## Acknowledgements
 Make Peace project was done by me and my teamates: 林敬庭、邵映慈、陳柏均
