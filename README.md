@@ -15,17 +15,22 @@ $ docker run -d --restart unless-stopped --name diglett -p 3210:80 diglett:lates
 ```
 
 ## Development
-1. Create your own `.env` to store sensitive information. (You can copy `example.env`
+- Install dependency `portaudio19`
+```
+$ sudo apt-get -y portaudio19-dev
+```
+- Install [poetry](https://python-poetry.org/docs/#installation) for Python package management.
+- Create your own `.env` to store sensitive information. (You can copy `example.env`
 and modify the content as you needed.) 
 ```sh
 $ cp example.env .env
 # Edit .env
 ```
-2. Run the development server.
+- Run the development server.
 ```sh
 $ uvicorn server:app --reload
 ```
-3. Run the test.
+- Run the test.
 ```sh
 $ python -m pytest
 ```
