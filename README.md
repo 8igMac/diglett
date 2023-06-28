@@ -1,4 +1,6 @@
 # Diglett
+![ci](https://github.com/8igmac/diglett/actions/workflows/ci.yml/badge.svg)
+
 The backend server for the [Make Peace Project](https://medium.com/@8igmac/design-thinking-from-zero-to-hero-c3dec4ce5d25).
 
 Features
