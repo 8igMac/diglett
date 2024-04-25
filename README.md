@@ -94,7 +94,11 @@ $ cp example.env .env
 ```
 - Run the development server.
 ```sh
-$ uvicorn server:app --reload
+$ uvicorn diglett.main:app --reload
+```
+- Get the speaker embedding with `curl`.
+```
+$ curl -X POST -F "file=@/path/to/file.wav" SERVER_IP:PORT/embed
 ```
 - Run the test.
 ```sh

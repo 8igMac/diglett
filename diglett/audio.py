@@ -1,6 +1,6 @@
 import wave
 import pyaudio
-import config
+import diglett.config as config
 import numpy as np
 # import matplotlib.pyplot as plt
 #
@@ -24,7 +24,7 @@ def get_mean_energy(raw_audio: bytes):
     Return:
         Mean energy level of input audio.
     """
-    arr = np.fromstring(raw_audio, dtype=np.int16)
+    arr = np.frombuffer(raw_audio, dtype=np.int16) # bit depth is 16bits.
     arr = np.abs(arr)
     mean = np.mean(arr)
 
