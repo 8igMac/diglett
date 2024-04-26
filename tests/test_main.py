@@ -22,7 +22,7 @@ def test_embed():
       emb = json.load(f)
       assert len(json_data["speaker_embedding"]) == len(emb["homer_emb"])
       for i in range(len(emb["homer_emb"])):
-        assert abs(json_data["speaker_embedding"][i] - emb["homer_emb"]) < 0.001 
+        assert abs(json_data["speaker_embedding"][i] - emb["homer_emb"][i]) < 0.001 
 
 
 def test_speaker_verification():
