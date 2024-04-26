@@ -56,17 +56,42 @@ segment.
 6. **Send back the result**: The server will stream back the speaker verification result as
 well as the average volume of the audio segment.
 
-<!-- TODO: API documentation and example. -->
 ## API Documentation
-- Get speaker embedding (RESTful API).
-  - input
-  - output
+- Get speaker embedding.
+  - URL: `http://SERVER_IP:PORT/embed`
+  - Request type: `POST`
+  - Resquest body: 5 seconds audio recording of a speaker 
+  ```
+  {
+    "file": [bytes],
+  }
+  ```
+  - Output: JSON
+  ```
+  {
+    "speaker_name": string,
+    "speaker_embedding": float[],
+    "avg_db": float,
+  }
+  ```
 
-- Speaker verification streaming (websocket).
-  - input
-    ```
-    ws://{SERVER_IP}:{PORT}/ws/stream
-    ```
+- Speaker verification streaming (websocket)
+  - URL: `ws://SERVER_IP:PORT/stream`
+  - Input: Continuous audio stream with the following JSON data.
+  ```
+  {
+    "audio_data": [base64 encoded bytes],
+    "speaker_embedding": [speaker emb1, speaker emb2]
+    "terminate_session": bool,
+  }
+  ```
+  - Output: Continuous labeled stream.
+  ```
+  {
+    "speaker": speaker_emb,
+    "db": float,
+  }
+  ```
 
 <!-- Deploy using Docker. -->
 ## Deploy with Docker
