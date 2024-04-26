@@ -79,13 +79,20 @@ $ docker buildx build -t diglett .
 $ docker run -d --restart unless-stopped --name diglett -p 3210:80 diglett:latest
 ```
 
-<!-- Setup local development environment. -->
 ## Setup local development environment
 - Install dependency `portaudio19`
 ```
 $ sudo apt-get -y portaudio19-dev
 ```
 - Install [poetry](https://python-poetry.org/docs/#installation) for Python package management.
+```
+$ pipx install poetry
+```
+- Clone the repo and install dependencies with poetry.
+```
+# Clone and cd into the repo.
+$ poetry install
+```
 - Create your own `.env` to store sensitive information. (You can copy `example.env`
 and modify the content as you needed.) 
 ```sh
@@ -96,14 +103,16 @@ $ cp example.env .env
 ```sh
 $ uvicorn diglett.main:app --reload
 ```
-- Get the speaker embedding with `curl`.
-```
-$ curl -X POST -F "file=@/path/to/file.wav" SERVER_IP:PORT/embed
-```
-- Run the test.
-```sh
-$ python -m pytest
-```
-
-## Acknowledgements
-Make Peace project was done by me and my teamates: 林敬庭、邵映慈、陳柏均
+- Now you can do:
+  - Run example Python client.
+  ```
+  $ python example/client.py 
+  ```
+  - Get the speaker embedding with `curl`.
+  ```
+  $ curl -X POST -F "file=@/path/to/file.wav" SERVER_IP:PORT/embed
+  ```
+  - Run the test.
+  ```sh
+  $ python -m pytest
+  ```
