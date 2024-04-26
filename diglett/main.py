@@ -4,7 +4,6 @@ from typing import Annotated
 import torch
 from speechbrain.inference.classifiers import EncoderClassifier
 
-import diglett.config as cfg
 from diglett.utils import bytes_preproc
 from diglett.audio import get_mean_energy
 
@@ -15,6 +14,8 @@ classifier = EncoderClassifier.from_hparams(
     savedir=classifier_dir,
 )
 similarity = torch.nn.CosineSimilarity(dim=-1, eps=1e-6)
+# Speaker verification threshold.
+sim_threshold = 0.25 
 
 
 @app.post("/embed")
@@ -101,10 +102,10 @@ async def stream(websocket: WebSocket):
             score2 = similarity(emb, spk2_tensor)
             score2 = score2.reshape(-1).numpy().tolist()[0]
 
-            if score1 > cfg.threshold:
+            if score1 > sim_threshold:
                 spk = spk1
                 print(f"1, score: {score1:.3f}, db: {mean:.0f}")
-            elif score2 > cfg.threshold:
+            elif score2 > sim_threshold:
                 spk = spk2
                 print(f"2, score: {score2:.3f}, db: {mean:.0f}")
             else:

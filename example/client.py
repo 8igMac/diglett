@@ -7,11 +7,10 @@ import websockets
 import asyncio
 import json
 import os
+import wave
 import base64
-import time
 from dotenv import load_dotenv
 
-import diglett.audio as audio
 import diglett.config as config
 
 # Load sensitive data from .env
@@ -19,11 +18,57 @@ load_dotenv()
 SERVER_IP = os.getenv("SERVER_IP")
 PORT = os.getenv("PORT")
 
+def record(seconds: int):
+    """ record audio.
+    args:
+        seconds: record duration (seconds).
+    return:
+        raw audio in bytes.
+    """
+    p = pyaudio.PyAudio()
+    stream = p.open(
+        format=config.sample_format,
+        channels=config.channels,
+        rate=config.fs,
+        frames_per_buffer=config.chunk,
+        input=True,
+    )
+    total_chuncks = int(config.fs / config.chunk * seconds)
+    frames = list()
+    for i in range(total_chuncks):
+        data = stream.read(config.chunk)
+        frames.append(data)
+    return b"".join(frames)
+
+def read_wav_file(filename:str):
+    """
+    Args:
+        filename: path to audio file.
+    Return:
+        Raw audio in bytes.
+    """
+    frames = list()
+    with wave.open(filename, "rb") as wf:
+        while len(data := wf.readframes(config.chunk)):
+            frames.append(data)
+    return b"".join(frames)
+
+def write_wav_file(filename: str, raw_audio: bytes):
+    """ Write audio bytes into wave file.
+
+    Args:
+        filename: Filename of output wave.
+        raw_audio: Raw audio in bytes.
+    """
+    with wave.open(filename, "wb") as wf:
+        wf.setnchannels(config.channels)
+        wf.setsampwidth(pyaudio.get_sample_size(config.sample_format))
+        wf.setframerate(config.fs)
+        wf.writeframes(raw_audio)
 
 async def send(websocket, stream, spkemb1, spkemb2):
     while True:
         try:
-            # data = stream.read(config.chunk)
             data = stream.read(int(config.fs / 3))
             """
             Sending JSON:
@@ -98,13 +143,13 @@ async def main():
 
     # Speaker1 config.
     print("speaker 1")
-    audio_data = audio.record(5)
-    audio.write_wav_file(f1, audio_data)
+    audio_data = record(5)
+    write_wav_file(f1, audio_data)
 
     # Speaker2 config.
     print("speaker 2")
-    audio_data = audio.record(5)
-    audio.write_wav_file(f2, audio_data)
+    audio_data = record(5)
+    write_wav_file(f2, audio_data)
 
     # Get speaker embedding and db.
     spkemb1, db1 = get_speaker_info(f1)
