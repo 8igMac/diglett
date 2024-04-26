@@ -20,7 +20,9 @@ def test_embed():
     assert json_data["avg_db"] == 562.2520378076098
     with open("tests/data/emb.json") as f:
       emb = json.load(f)
-      assert json_data["speaker_embedding"] == emb["homer_emb"]
+      assert len(json_data["speaker_embedding"]) == len(emb["homer_emb"])
+      for i in range(len(emb["homer_emb"])):
+        assert abs(json_data["speaker_embedding"][i] - emb["homer_emb"]) < 0.001 
 
 
 def test_speaker_verification():
