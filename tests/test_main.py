@@ -1,5 +1,6 @@
 from diglett.main import app
 from fastapi.testclient import TestClient
+import json
 
 client = TestClient(app)
 
@@ -16,8 +17,11 @@ def test_embed():
         assert res.status_code == 200
     json_data = res.json()
     assert "speaker_name" in json_data
-    assert len(json_data["speaker_embedding"]) == 192
     assert json_data["avg_db"] == 562.2520378076098
+    with open("tests/data/emb.json") as f:
+      emb = json.load(f)
+      assert json_data["speaker_embedding"] == emb["homer_emb"]
+
 
 def test_speaker_verification():
     pass
