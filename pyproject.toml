@@ -4,10 +4,7 @@ version = "0.1.0"
 description = "Real-time audio streaming server that support speaker verification and sound level detection."
 authors = ["8igmac <8igmac@pm.me>"]
 readme = "README.md"
-# Note: Package mode install the project root directory so that
-# this project is in Python module search path. We need this 
-# for the absoulte import to work.
-package-mode = true
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"

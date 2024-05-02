@@ -135,7 +135,7 @@ $ uvicorn diglett.main:app --reload
 - Now you can do:
   - Run example Python client.
   ```
-  $ python example/client.py 
+  $ python -m example.client
   ```
   - Get the speaker embedding with `curl`.
   ```
