@@ -103,6 +103,10 @@ $ docker buildx build -t diglett .
 ```
 $ docker run -d --restart unless-stopped --name diglett -p 3210:80 diglett:latest
 ```
+- Wait a few seconds for the application to download some 
+machine learning model file in the container. You can check 
+the download progress with `docker logs -f diglett`.
+- Interactive API documentation check [http://localhost:3210/docs/](http://localhost:3210/docs)
 
 ## Setup local development environment
 - Install dependency `portaudio19`
