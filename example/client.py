@@ -6,17 +6,16 @@ import requests
 import websockets
 import asyncio
 import json
-import os
 import wave
 import base64
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 
 import diglett.config as config
 
 # Load sensitive data from .env
-load_dotenv()
-SERVER_IP = os.getenv("SERVER_IP")
-PORT = os.getenv("PORT")
+info = dotenv_values(".env")
+SERVER_IP = info["SERVER_IP"]
+PORT = info["PORT"]
 
 def record(seconds: int):
     """ record audio.
