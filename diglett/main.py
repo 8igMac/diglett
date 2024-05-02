@@ -126,6 +126,6 @@ async def stream(websocket: WebSocket):
         print("Client disconnected.")
 
 
-@app.get("/")
-async def root():
-    return {"msg": "Hello World"}
+@app.get("/ping")
+async def ping():
+    return {"msg": "pong"}

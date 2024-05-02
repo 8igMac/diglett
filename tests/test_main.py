@@ -4,10 +4,10 @@ import json
 
 client = TestClient(app)
 
-def test_root():
-    res = client.get("/")
+def test_ping():
+    res = client.get("/ping")
     assert res.status_code == 200
-    assert res.json() == {"msg": "Hello World"}
+    assert res.json() == {"msg": "pong"}
 
 def test_embed():
     filename = "tests/data/homer.wav"
