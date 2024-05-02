@@ -1,5 +1,6 @@
 import base64
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, File
+from fastapi.staticfiles import StaticFiles
 from typing import Annotated
 import torch
 from speechbrain.inference.classifiers import EncoderClassifier
@@ -17,6 +18,7 @@ similarity = torch.nn.CosineSimilarity(dim=-1, eps=1e-6)
 # Speaker verification threshold.
 sim_threshold = 0.25 
 
+app.mount("/demo", StaticFiles(directory="frontend", html=True))
 
 @app.post("/embed")
 async def embed(file: Annotated[bytes, File()]):
@@ -129,3 +131,7 @@ async def stream(websocket: WebSocket):
 @app.get("/ping")
 async def ping():
     return {"msg": "pong"}
+
+@app.get("/")
+async def root():
+    return {"msg": "todo: show site map"}

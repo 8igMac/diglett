@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="manifest" href="site.webmanifest" />
+  </head>
+  <body>
+    <h1>Diglett Demo Website.</h1>
+
+    <audio controls>
+      <source src="homer.wav" type="audio/wav" />
+    </audio>
+
+    <button type="button" onclick="get_emb('homer')">
+      Get homer voice signiture
+    </button>
+    <p id="homer_status">Status of homer</p>
+
+    <audio controls>
+      <source src="marge.wav" type="audio/wav" />
+    </audio>
+
+    <button type="button" onclick="get_emb('marge')">
+      Get marge voice signiture
+    </button>
+    <p id="marge_status">Status of marge</p>
+
+    <audio controls>
+      <source src="homer_marge_argu.wav" type="audio/wav" />
+    </audio>
+
+    <script src="index.js"></script>
+  </body>
+</html>
